@@ -1,5 +1,7 @@
 # onvif_http_C
-天地伟业 tiandy onvif 接口 http snapshot token
+天地伟业 tiandy onvif 接口 http 
+no gsoap
+get snapshot token
 
 #how to use
 
