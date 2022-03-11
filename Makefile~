@@ -1,0 +1,73 @@
+CROSS =   
+CC = $(CROSS)gcc  
+CXX = $(CROSS)g++  
+DEBUG =
+DEFINE = -D EZXML_NOMMAP 
+CPPFLAGS = $(DEBUG) -x c++ -w -c -fPIC $(DEFINE)
+CFLAGS = $(DEBUG) -x c -w -c -fPIC $(DEFINE) 
+MV = mv -f  
+RM = rm -rf  
+LN = ln -sf  
+
+TARGET = onvif_http.out
+
+TOP_PATH = $(shell pwd)
+SRC_PATH = $(TOP_PATH)
+INC_PATH = -I$(TOP_PATH)/curl
+
+DIRS = $(shell find $(SRC_PATH) -maxdepth 1 -type d)
+
+FILES = $(foreach dir, $(DIRS), $(wildcard $(dir)/*.cpp $(dir)/*.c))
+
+
+##########################################################  
+# srcs  all .cpp .cc and .c files
+##########################################################  
+SRCS_CPP += $(foreach dir, $(DIRS), $(wildcard $(dir)/*.cpp))  
+SRCS_CC += $(foreach dir, $(DIRS), $(wildcard $(dir)/*.cc))  
+SRCS_C += $(foreach dir, $(DIRS), $(wildcard $(dir)/*.c))  
+
+##########################################################  
+# objs  all *.o files
+##########################################################  
+OBJS_CPP = $(patsubst %.cpp, %.o, $(SRCS_CPP))  
+OBJS_CC = $(patsubst %.cc, %.o, $(SRCS_CC))  
+OBJS_C = $(patsubst %.c, %.o, $(SRCS_C))  
+
+##########################################################  
+# paths
+##########################################################  
+
+LIB_PATH += -L$(TOP_PATH)/curl/lib/x64
+
+
+##########################################################  
+# libs
+##########################################################  
+LIBS     = -lcurl
+##########################################################  
+# building
+##########################################################  
+all:$(TARGET)
+
+#1. link all o to out
+#2. cp so to /usr/local/lib 
+$(TARGET) : $(OBJS_CPP) $(OBJS_CC) $(OBJS_C)
+	$(CC)  $^ -o $(TARGET) $(LIB_PATH) $(LIBS)
+	
+
+#compile all cpp to o
+$(OBJS_CPP):%.o : %.cpp
+	$(CC) $(CPPFLAGS) $< -o  $@ $(INC_PATH)
+
+#compile all cc to o
+$(OBJS_CC):%.o : %.cc
+	$(CC) $(CFLAGS) $< -o  $@ $(INC_PATH)
+
+#compile all c to o
+$(OBJS_C):%.o : %.c
+	$(CC) $(CFLAGS) $< -o  $@ $(INC_PATH)
+
+.PHONY : clean  
+clean:  
+	@ $(RM) $(TARGET) $(OBJS_C) $(OBJS_CC) $(OBJS_CPP) 
